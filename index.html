@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>AR.js Solar System - Sun and Earth</title>
+  <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+  <script src="https://cdn.rawgit.com/jeromeetienne/AR.js/1.7.2/aframe/build/aframe-ar.min.js"></script>
+</head>
+<body style="margin: 0; overflow: hidden;">
+  <a-scene embedded arjs="sourceType: webcam; detectionMode: mono_and_matrix; matrixCodeType: 3x3; performanceMode: true; debugUIEnabled: false;" vr-mode-ui="enabled: false">
+    <a-assets>
+      <!-- Add GLB files for the Sun and Earth -->
+      <a-asset-item id="sun" src="sun.glb"></a-asset-item>
+      <a-asset-item id="earth" src="earth.glb"></a-asset-item>
+    </a-assets>
+
+    <a-marker preset="hiro" smooth="true" smoothCount="5" smoothTolerance="0.01" smoothThreshold="5">
+      <!-- Sun at the center -->
+      <a-gltf-model src="#sun" position="0 0 0" scale="2 2 2"></a-gltf-model>
+
+      <!-- Earth orbiting the Sun -->
+      <a-entity id="earth-entity" gltf-model="#earth"></a-entity>
+    </a-marker>
+
+    <a-entity camera></a-entity>
+  </a-scene>
+
+  <script>
+    // Animate Earth with smooth circular orbit around the Sun
+    AFRAME.registerComponent('planet-orbit', {
+      schema: {
+        radius: {type: 'number', default: 4},
+        speed: {type: 'number', default: 0.001}
+      },
+      tick: function (time, timeDelta) {
+        const angle = time * this.data.speed;
+        this.el.object3D.position.set(Math.cos(angle) * this.data.radius, 0, Math.sin(angle) * this.data.radius);
+        this.el.object3D.rotation.y += 0.005; // Earth's self-rotation
+      }
+    });
+
+    // Assign orbit to Earth
+    document.getElementById('earth-entity').setAttribute('planet-orbit', 'radius: 4; speed: 0.001');
+  </script>
+</body>
+</html>
